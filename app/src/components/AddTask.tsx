@@ -1,17 +1,17 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { useState } from "react";
 import { useTasks } from "../context/TaskContext";
 import { Task } from "../types/task";
 
 export function AddTask() {
-  const { dispatch } = useTasks();
+  const { state, dispatch } = useTasks();
 
   const [title, setTitle] = useState("");
   const [priority, setPriority] = useState<Task["priority"]>("medium");
   const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     const trimmedTitle = title.trim();
@@ -40,7 +40,7 @@ export function AddTask() {
     >
       <div className="flex flex-col gap-1">
         <label htmlFor="task-title" className="font-medium">
-          Nowe zadanie
+          New Task
         </label>
         <input
           id="task-title"
@@ -50,7 +50,7 @@ export function AddTask() {
             setTitle(e.target.value);
             if (error) setError(null);
           }}
-          placeholder="Np. Zrobić review kodu"
+          placeholder="eg. Do a code review"
           className="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         {error && (
@@ -62,7 +62,7 @@ export function AddTask() {
 
       <div className="flex flex-col gap-1">
         <label htmlFor="priority" className="font-medium">
-          Priorytet
+          Priority
         </label>
         <select
           id="priority"
@@ -82,7 +82,7 @@ export function AddTask() {
         type="submit"
         className="w-full bg-blue-500 hover:bg-blue-600 transition text-white py-2 rounded font-medium"
       >
-        Dodaj zadanie
+        Add new
       </button>
     </form>
   );

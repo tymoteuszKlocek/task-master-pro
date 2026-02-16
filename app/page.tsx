@@ -1,4 +1,5 @@
 import { AddTask } from "../app/src/components/AddTask";
+import { TaskList } from "./src/components/TaskList";
 
 export default function Home() {
   return (
@@ -7,6 +8,7 @@ export default function Home() {
         Task Master Pro
       </h1>
       <AddTask />
+      <TaskList />
     </div>
   );
 }

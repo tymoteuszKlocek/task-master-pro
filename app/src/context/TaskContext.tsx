@@ -4,7 +4,7 @@ import { Task } from '../types/task';
 
 type State = {
     tasks: Task[];
-    filter: 'all' | 'completed' | 'high';
+    filter: 'all' | 'completed' | 'active';
 }
 
 type Action =
