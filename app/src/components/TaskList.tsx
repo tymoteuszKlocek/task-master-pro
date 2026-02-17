@@ -84,7 +84,7 @@ function TaskItem({ onDelete, onToggle, task }: TaskItemProps) {
     }[task.priority];
 
     return (
-        <li className="p-4 flex item-center gap-4 hover:bg-gray-50 transition">
+        <div className="p-4 flex item-center gap-4 hover:bg-gray-50 transition">
             <input
                 className="w-5 h-5 cursor-pointer"
                 type="checkbox"
@@ -111,6 +111,6 @@ function TaskItem({ onDelete, onToggle, task }: TaskItemProps) {
             >
                 Usuń
             </button>
-        </li>
+        </div>
     )
 }
