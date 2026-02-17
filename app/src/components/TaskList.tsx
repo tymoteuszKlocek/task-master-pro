@@ -2,11 +2,26 @@
 
 import type { Task } from "../types/task";
 import { useTasks } from "../context/TaskContext";
+import { motion, AnimatePresence } from "framer-motion";
 
 export function TaskList() {
-    const { state, dispatch } = useTasks();
 
-    const filteredTasks = state.tasks.filter((t) => {
+    const { state, dispatch } = useTasks();
+    const total = state.tasks.length;
+    const active = state.tasks.filter(t => !t.completed).length;
+    const completed = state.tasks.filter(t => t.completed).length;
+
+    const priority = {
+        high: 1,
+        medium: 2,
+        low: 3
+    }
+
+    const sorted = [...state.tasks].sort((a: Task, b: Task) => {
+        return priority[a.priority] - priority[b.priority];
+    })
+
+    const filteredTasks = sorted.filter((t) => {
         if (state.filter === 'completed') return t.completed;
         if (state.filter === 'active') return !t.completed;
         return true;
@@ -21,17 +36,35 @@ export function TaskList() {
     }
 
     return (
-        <div>
-            <ul>
-                {
-                    filteredTasks.map(task => {
-                        return <TaskItem key={task.id}
-                            task={task}
-                            onToggle={() => dispatch({ type: "TOGGLE_TASK", id: task.id })}
-                            onDelete={() => dispatch({ type: "DELETE_TASK", id: task.id })} />
-                    })
-                }
-            </ul>
+        <div className="space-y-3">
+            <div className="p-2 rounded bg-amber-50 flex justify">
+                <div className="px-1 text-sm font-medium text-gray-500">Total: {total}</div>
+                <div className="px-1 text-sm font-medium text-gray-500">Completed: {completed}</div>
+                <div className="px-1 text-sm font-medium text-gray-500">Active: {active}</div>
+            </div>
+            <div className="bg-white rounded-lg shadow-md divide-y">
+                <ul>
+                    <AnimatePresence mode="popLayout">
+                        {
+                            filteredTasks.map(task => (
+                                <motion.li
+                                    key={task.id}
+                                    initial={{ opacity: 0, x: -20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: 20 }}
+                                    layout // To sprawia, że inne elementy płynnie się przesuwają
+                                    transition={{ duration: 0.2 }}
+                                ><TaskItem key={task.id}
+                                    task={task}
+                                    onToggle={() => dispatch({ type: "TOGGLE_TASK", id: task.id })}
+                                    onDelete={() => dispatch({ type: "DELETE_TASK", id: task.id })}
+                                    />
+                                </motion.li>
+                            ))}
+                    </AnimatePresence>
+                </ul>
+            </div>
+
         </div>
     )
 }
@@ -51,7 +84,7 @@ function TaskItem({ onDelete, onToggle, task }: TaskItemProps) {
     }[task.priority];
 
     return (
-        <div className="p-4 flex item-center gap-4 hover:bg-gray-50 transition">
+        <li className="p-4 flex item-center gap-4 hover:bg-gray-50 transition">
             <input
                 className="w-5 h-5 cursor-pointer"
                 type="checkbox"
@@ -78,6 +111,6 @@ function TaskItem({ onDelete, onToggle, task }: TaskItemProps) {
             >
                 Usuń
             </button>
-        </div>
+        </li>
     )
 }
