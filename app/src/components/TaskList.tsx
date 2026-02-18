@@ -3,6 +3,9 @@
 import type { Task } from "../types/task";
 import { useTasks } from "../context/TaskContext";
 import { motion, AnimatePresence } from "framer-motion";
+import { useEffect, useMemo } from "react";
+
+import { useFetch } from "../hooks/useFetch";
 
 export function TaskList() {
 
@@ -10,22 +13,46 @@ export function TaskList() {
     const total = state.tasks.length;
     const active = state.tasks.filter(t => !t.completed).length;
     const completed = state.tasks.filter(t => t.completed).length;
-
+    const {data, isLoading, error, refetch} = useFetch<any[]>("https://jsonplaceholder.typicode.com/todos?_limit=15");
+    console.log('data', data);
     const priority = {
         high: 1,
         medium: 2,
         low: 3
     }
 
-    const sorted = [...state.tasks].sort((a: Task, b: Task) => {
-        return priority[a.priority] - priority[b.priority];
-    })
+    useEffect(() => {
+        if (data) {
+            const mappedTasks: Task[] = data.map(item => ({
+                id: item.id.toString(),
+                title: item.title,
+                completed: item.completed,
+                priority: 'medium' // domyślnie
+            }));
+            
+            dispatch({ type: 'SET_TASKS', payload: mappedTasks });
+        }
+        
+    
+        return () => {
+            
+        }
+    }, [data, dispatch]);
 
-    const filteredTasks = sorted.filter((t) => {
-        if (state.filter === 'completed') return t.completed;
-        if (state.filter === 'active') return !t.completed;
-        return true;
-    });
+    // useMemo dla pratyki
+    const sorted = useMemo(() => {
+        return [...state.tasks].sort((a: Task, b: Task) => {
+            return priority[a.priority] - priority[b.priority];
+        });
+    }, [state.tasks]);
+
+    const filteredTasks = useMemo(() => 
+        sorted.filter((t) => {
+            if (state.filter === 'completed') return t.completed;
+            if (state.filter === 'active') return !t.completed;
+            return true;
+        })
+    , [sorted, state.filter]);
 
     if (filteredTasks.length === 0) {
         return (
@@ -35,6 +62,8 @@ export function TaskList() {
         );
     }
 
+    if (isLoading) return <div>Loading...</div>;
+    if (error) return <div>Error: {error}</div>;
     return (
         <div className="space-y-3">
             <div className="p-2 rounded bg-amber-50 flex justify">
@@ -54,10 +83,10 @@ export function TaskList() {
                                     exit={{ opacity: 0, x: 20 }}
                                     layout // To sprawia, że inne elementy płynnie się przesuwają
                                     transition={{ duration: 0.2 }}
-                                ><TaskItem key={task.id}
-                                    task={task}
-                                    onToggle={() => dispatch({ type: "TOGGLE_TASK", id: task.id })}
-                                    onDelete={() => dispatch({ type: "DELETE_TASK", id: task.id })}
+                                ><TaskItem
+                                        task={task}
+                                        onToggle={() => dispatch({ type: "TOGGLE_TASK", id: task.id })}
+                                        onDelete={() => dispatch({ type: "DELETE_TASK", id: task.id })}
                                     />
                                 </motion.li>
                             ))}
@@ -89,7 +118,7 @@ function TaskItem({ onDelete, onToggle, task }: TaskItemProps) {
                 className="w-5 h-5 cursor-pointer"
                 type="checkbox"
                 name="completed"
-                id="completed"
+                id={task.id}
                 onChange={onToggle}
 
             />

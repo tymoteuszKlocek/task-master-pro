@@ -12,6 +12,7 @@ type Action =
     | { type: 'TOGGLE_TASK'; id: string }
     | { type: 'DELETE_TASK'; id: string }
     | { type: 'SET_FILTER'; filter: State['filter'] }
+    | { type: 'SET_TASKS'; payload: Task[] }
     | { type: 'LOAD_TASKS'; tasks: Task[] };
 
 const TaskContext = createContext<{ state: State; dispatch: React.Dispatch<Action> } | null>(null);
@@ -35,7 +36,11 @@ function taskReducer(state: State, action: Action): State {
                         completed: !task.completed
                     } : task)
             }
-
+        case 'SET_TASKS':
+            return {
+                ...state,
+                tasks: action.payload
+            }
         case 'DELETE_TASK':
             return {
                 ...state,
