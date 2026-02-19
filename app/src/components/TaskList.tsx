@@ -13,8 +13,7 @@ export function TaskList() {
     const total = state.tasks.length;
     const active = state.tasks.filter(t => !t.completed).length;
     const completed = state.tasks.filter(t => t.completed).length;
-    const {data, isLoading, error, refetch} = useFetch<any[]>("https://jsonplaceholder.typicode.com/todos?_limit=15");
-    console.log('data', data);
+    const { data, isLoading, error, refetch } = useFetch<any[]>("https://jsonplaceholder.typicode.com/todos?_limit=15");
     const priority = {
         high: 1,
         medium: 2,
@@ -22,20 +21,20 @@ export function TaskList() {
     }
 
     useEffect(() => {
-        if (data) {
+        if (data && state.tasks.length === 0) {
             const mappedTasks: Task[] = data.map(item => ({
                 id: item.id.toString(),
                 title: item.title,
                 completed: item.completed,
                 priority: 'medium' // domyślnie
             }));
-            
+
             dispatch({ type: 'SET_TASKS', payload: mappedTasks });
         }
-        
-    
+
+
         return () => {
-            
+
         }
     }, [data, dispatch]);
 
@@ -46,13 +45,13 @@ export function TaskList() {
         });
     }, [state.tasks]);
 
-    const filteredTasks = useMemo(() => 
+    const filteredTasks = useMemo(() =>
         sorted.filter((t) => {
             if (state.filter === 'completed') return t.completed;
             if (state.filter === 'active') return !t.completed;
             return true;
         })
-    , [sorted, state.filter]);
+        , [sorted, state.filter]);
 
     if (filteredTasks.length === 0) {
         return (
@@ -70,6 +69,11 @@ export function TaskList() {
                 <div className="px-1 text-sm font-medium text-gray-500">Total: {total}</div>
                 <div className="px-1 text-sm font-medium text-gray-500">Completed: {completed}</div>
                 <div className="px-1 text-sm font-medium text-gray-500">Active: {active}</div>
+                <button
+                
+                    onClick={() => refetch()}
+                    disabled={isLoading}
+                    className="px-2 text-sm font-bold uppercase tracking-wider disabled:opacity-50 text-amber-700 dark:text-amber-400 hover:underline">{isLoading ? "Refreshing..." : "Sync API 🔄"}</button>
             </div>
             <div className="bg-white rounded-lg shadow-md divide-y">
                 <ul>
@@ -135,10 +139,10 @@ function TaskItem({ onDelete, onToggle, task }: TaskItemProps) {
 
             <button
                 onClick={onDelete}
-                className="text-red-500 hover:text-red-700 font-medium transition"
+                className="text-red-500 hover:text-red-700 font-medium transition cursor-pointer "
                 aria-label={`Remove "${task.title}"`}
             >
-                Usuń
+                Remove
             </button>
         </div>
     )
